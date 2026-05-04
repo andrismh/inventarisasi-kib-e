@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}New Entry — KIB-E{% endblock %}
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.default.min.css" rel="stylesheet">
+<style>
+    .ts-control { border-radius: 0.5rem; border-color: #e2e8f0; background-color: rgba(248, 250, 252, 0.5); padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+    .ts-control.focus { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); background-color: #fff; }
+</style>
+{% endblock %}
+{% block content %}
+<div>
+    <h1 id="page-title" class="text-2xl font-bold text-slate-800 tracking-tight">New Entry</h1>
+    <p id="page-subtitle" class="text-slate-500 text-sm mt-1 mb-6">Add a new inventory item</p>
+</div>
+
+<form id="entry-form" class="space-y-6 max-w-5xl">
+
+  <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
+    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-5 flex items-center">Identity & Acquisition</h2>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm mb-1">Judul Buku</label>
+            <input name="judul_buku" type="text" autocomplete="off"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" data-similar="judul">
+            <ul data-similar-list="judul" class="mt-1 text-xs text-slate-600 space-y-0.5"></ul>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">NIBAR <span class="text-rose-500">*</span></label>
+            <input name="nibar" type="number" required autocomplete="off"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" data-similar="nibar">
+            <ul data-similar-list="nibar" class="mt-1 text-xs text-slate-600 space-y-0.5"></ul>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Kode Register <span class="text-rose-500">*</span></label>
+            <input name="kode_register" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Kode Barang <span class="text-rose-500">*</span></label>
+            <select name="kode_barang_id" required data-master="barang" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Tahun Perolehan <span class="text-rose-500">*</span></label>
+            <input name="tahun_perolehan" type="number" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nilai Perolehan (Rp) <span class="text-rose-500">*</span></label>
+            <input name="nilai_perolehan" type="number" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+    </div>
+  </section>
+
+  <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
+    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-5 flex items-center">Asset Details</h2>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm mb-1">Jenis Aset <span class="text-rose-500">*</span></label>
+            <select name="jenis_aset" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                {% for v in enums.jenis_aset %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Pencipta Buku</label>
+            <input name="pencipta_buku" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div class="col-span-2">
+            <label class="block text-sm mb-1">Spesifikasi Buku</label>
+            <textarea name="spesifikasi_buku" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></textarea>
+        </div>
+        <div class="col-span-2">
+            <label class="block text-sm mb-1">Spesifikasi</label>
+            <textarea name="spesifikasi" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></textarea>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Jumlah Barang <span class="text-rose-500">*</span></label>
+            <input name="jumlah_barang" type="number" value="1" min="1" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Satuan Barang <span class="text-rose-500">*</span></label>
+            <select name="satuan_barang_id" required data-master="satuan" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Merk / Type</label>
+            <input name="merk_type" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+    </div>
+  </section>
+
+  <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
+    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-5 flex items-center">Location & Condition</h2>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm mb-1">Alamat</label>
+            <input name="alamat" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Koordinat</label>
+            <input name="koordinat" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Ruangan</label>
+            <select name="ruangan_id" data-master="ruang" data-allow-empty="1" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Kondisi Barang <span class="text-rose-500">*</span></label>
+            <select name="kondisi_barang_id" required data-master="kondisi" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></select>
+        </div>
+    </div>
+  </section>
+
+  <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
+    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-5 flex items-center">Usage & Custody</h2>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm mb-1">Status Keberadaan</label>
+            <select name="status_keberadaan" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                <option value="">—</option>
+                {% for v in enums.status_keberadaan %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Jml Keberadaan (Hilang/Tdk Ditemukan)</label>
+            <input name="jml_keberadaan" type="number" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Merupakan Atribusi</label>
+            <select name="merupakan_atribusi" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                <option value="">—</option>
+                {% for v in enums.merupakan_atribusi %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">NIBAR Atribusi</label>
+            <input name="nibar_atribusi" type="number" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Penggunaan</label>
+            <select name="penggunaan" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                <option value="">—</option>
+                {% for v in enums.penggunaan %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nama Kuasa</label>
+            <input name="nama_kuasa" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nama Pemakai</label>
+            <input name="nama_pemakai" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Status Pemakai</label>
+            <input name="status_pemakai" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+    </div>
+  </section>
+
+  <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
+    <h2 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-5 flex items-center">Documents & Notes</h2>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm mb-1">BAST</label>
+            <select name="bast" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+                <option value="">—</option>
+                {% for v in enums.bast %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nama Dasar Penggunaan</label>
+            <input name="nama_dasar_penggunaan" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nama Dokumen</label>
+            <input name="nama_dokumen" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Nibar Tercatat Ganda</label>
+            <input name="nibar_tercatat_ganda" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div class="col-span-2">
+            <label class="block text-sm mb-1">Deskripsi Barang</label>
+            <textarea name="deskripsi_barang" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></textarea>
+        </div>
+        <div class="col-span-2">
+            <label class="block text-sm mb-1">Keterangan</label>
+            <textarea name="keterangan" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"></textarea>
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Petugas (pisahkan dengan ;)</label>
+            <input name="petugas" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+        <div>
+            <label class="block text-sm mb-1">Foto (path)</label>
+            <input name="foto" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        </div>
+    </div>
+  </section>
+
+  <div id="form-error" class="hidden bg-rose-50 border border-rose-200 text-rose-800 text-sm p-3 rounded"></div>
+
+  <div class="flex justify-end gap-2">
+    <a href="/" class="px-5 py-2.5 text-sm font-medium border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors">Cancel</a>
+    <button type="button" id="btn-reset" class="hidden px-5 py-2.5 text-sm font-medium border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors">Cancel Edit</button>
+    <button type="submit" id="btn-submit" class="px-5 py-2.5 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 hover:-translate-y-0.5 shadow-sm hover:shadow transition-all duration-200">Save Entry</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="{{ url_for('static', filename='js/new_entry.js') }}"></script>
+{% endblock %}
