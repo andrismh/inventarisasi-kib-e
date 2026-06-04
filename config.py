@@ -14,3 +14,10 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     EXCEL_SEED_PATH = BASE_DIR / "Format_Excel_KIBE.xlsx"
+    FOTO_UPLOAD_DIR = BASE_DIR / "app" / "static" / "foto"
+    MAX_FOTO_UPLOAD_BYTES = int(os.environ.get("MAX_FOTO_UPLOAD_BYTES", 5 * 1024 * 1024))
+    FOTO_ALLOWED_MIME_TYPES = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+    }

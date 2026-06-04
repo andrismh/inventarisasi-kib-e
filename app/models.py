@@ -99,6 +99,7 @@ class InventoryItem(db.Model):
             "kode_barang": self.kode_barang.nama if self.kode_barang else None,
             "tahun_perolehan": self.tahun_perolehan,
             "nilai_perolehan": self.nilai_perolehan,
+            "asal_usul": self.spesifikasi,
             "spesifikasi": self.spesifikasi,
             "jenis_aset": self.jenis_aset,
             "judul_buku": self.judul_buku,

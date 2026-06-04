@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+app/static/foto/
 
 # PyInstaller
 *.manifest
@@ -60,7 +61,6 @@ db.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
-instance/
 .webassets-cache
 
 # Scrapy stuff:

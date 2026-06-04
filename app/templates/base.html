@@ -33,29 +33,38 @@
         .tabulator-cell { padding: 0.875rem 1rem !important; }
         .tabulator-footer { background-color: white !important; border-top: 1px solid #e2e8f0 !important; padding: 0.5rem !important; }
         @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media (max-width: 767px) {
+            .tabulator { font-size: 0.8125rem; }
+            .tabulator-cell { padding: 0.625rem 0.75rem !important; }
+            .tabulator-header .tabulator-col { min-height: 2.5rem; }
+            .tabulator-footer { font-size: 0.75rem; }
+            .ts-control { min-height: 2.75rem; }
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900">
-<div class="flex min-h-screen">
-    <aside class="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-xl z-10">
-        <div class="px-6 py-8 border-b border-slate-800/60 flex flex-col items-center justify-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg flex items-center justify-center mb-3">
+<div class="flex min-h-screen flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-100 flex md:flex-col shadow-xl z-10">
+        <div class="px-4 py-3 md:px-6 md:py-8 border-b md:border-b border-slate-800/60 flex flex-row md:flex-col items-center justify-start md:justify-center gap-3 md:gap-0 shrink-0">
+            <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg flex items-center justify-center md:mb-3">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             </div>
-            <div class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">KIB-E</div>
-            <div class="text-xs font-medium text-slate-400 uppercase tracking-widest mt-1">Inventarisasi</div>
+            <div>
+                <div class="text-lg md:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">KIB-E</div>
+                <div class="text-[0.65rem] md:text-xs font-medium text-slate-400 uppercase tracking-widest md:mt-1">Inventarisasi</div>
+            </div>
         </div>
-        <nav class="flex-1 py-6 space-y-2 px-4">
+        <nav class="flex-1 px-2 py-2 md:py-6 md:space-y-2 md:px-4 flex md:block items-center gap-2 overflow-x-auto">
             {% set links = [
                 ('dashboard', '/', 'Dashboard', '<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>'),
-                ('entry', '/entry', 'New Entry', '<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>'),
-                ('master', '/master', 'Master Table', '<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>'),
+                ('entry', '/entry', 'Add / Edit Item', '<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>'),
+                ('master', '/master', 'Inventory Editor', '<svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>'),
             ] %}
             {% for key, href, label, icon in links %}
             <a href="{{ href }}"
-               class="flex items-center px-4 py-3 text-sm rounded-lg transition-all duration-200 ease-in-out group
-                      {% if active == key %}bg-emerald-500/10 text-emerald-400 font-medium{% else %}text-slate-300 hover:bg-slate-800 hover:text-white hover:translate-x-1{% endif %}">
+               class="flex items-center shrink-0 px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm rounded-lg transition-all duration-200 ease-in-out group
+                      {% if active == key %}bg-emerald-500/10 text-emerald-400 font-medium{% else %}text-slate-300 hover:bg-slate-800 hover:text-white md:hover:translate-x-1{% endif %}">
                 <span class="{% if active == key %}text-emerald-400{% else %}text-slate-500 group-hover:text-slate-300{% endif %} transition-colors duration-200">
                     {{ icon | safe }}
                 </span>
@@ -63,12 +72,12 @@
             </a>
             {% endfor %}
         </nav>
-        <div class="px-6 py-4 text-xs text-slate-500 border-t border-slate-800/60 flex justify-between items-center">
+        <div class="hidden md:flex px-6 py-4 text-xs text-slate-500 border-t border-slate-800/60 justify-between items-center">
             <span>v0.1</span>
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         </div>
     </aside>
-    <main class="flex-1 p-8 pb-20 overflow-x-auto bg-slate-50/50">
+    <main class="flex-1 p-4 sm:p-6 md:p-8 pb-20 md:pb-20 overflow-x-hidden bg-slate-50/50">
         <div class="max-w-7xl mx-auto">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for cat, msg in messages %}
@@ -85,7 +94,7 @@
             {% endwith %}
             {% block content %}{% endblock %}
         </div>
-        <footer class="fixed bottom-0 right-0 w-[calc(100%-16rem)] bg-white/80 backdrop-blur-md border-t border-slate-200 py-3 text-center text-sm font-semibold text-emerald-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
+        <footer class="fixed bottom-0 right-0 w-full md:w-[calc(100%-16rem)] bg-white/80 backdrop-blur-md border-t border-slate-200 px-3 py-3 text-center text-xs sm:text-sm font-semibold text-emerald-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
             Bismillah Andri Kaya Raya Aamiin ya Allah
         </footer>
     </main>

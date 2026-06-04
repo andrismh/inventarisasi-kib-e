@@ -1,20 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Master Table — KIB-E{% endblock %}
 {% block content %}
-<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Master Table</h1>
-        <p class="text-slate-500 text-sm mt-1">Full editable inventory grid</p>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Inventory Editor</h1>
+        <p id="editor-subtitle" class="text-slate-500 text-sm mt-1">Full editable inventory grid</p>
     </div>
-    <div class="flex items-center gap-4">
-        <div class="relative">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap sm:items-center gap-3">
+        <select id="queue-filter" class="w-full sm:w-auto px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm">
+            <option value="">All rows</option>
+            <option value="all_optional">Any missing optional field</option>
+            <option value="spesifikasi">Missing Asal Usul</option>
+            <option value="judul_buku">Missing Judul Buku</option>
+            <option value="alamat">Missing Alamat</option>
+            <option value="ruangan_id">Missing Ruangan</option>
+            <option value="penggunaan">Missing Penggunaan</option>
+            <option value="bast">Missing BAST</option>
+            <option value="foto">Missing Foto</option>
+            <option value="duplicates:judul_buku">Duplicate title risk</option>
+        </select>
+        <div class="relative w-full sm:w-80">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-            <input id="filter" type="text" placeholder="Search all columns..."
-                   class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm w-72 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm">
+            <input id="filter" type="text" placeholder="Search NIBAR, title, register..."
+                   class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm w-full bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm">
         </div>
-        <div id="status" class="text-sm font-medium px-4 py-1.5 rounded-full bg-white text-slate-600 shadow-sm border border-slate-200"></div>
+        <button id="reload-grid" type="button" class="w-full sm:w-auto px-4 py-2 text-sm font-medium border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors">Reload</button>
+        <div id="status" class="w-full sm:w-auto text-center text-sm font-medium px-4 py-1.5 rounded-full bg-white text-slate-600 shadow-sm border border-slate-200"></div>
     </div>
 </div>
 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">

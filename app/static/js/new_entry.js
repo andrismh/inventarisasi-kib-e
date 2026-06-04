@@ -41,6 +41,44 @@
     const btnSubmit = document.getElementById('btn-submit');
     const btnReset = document.getElementById('btn-reset');
     const nibarInput = document.querySelector('input[name="nibar"]');
+    const params = new URLSearchParams(window.location.search);
+    const fotoInput = document.getElementById('foto-input');
+    const fotoPathInput = document.getElementById('foto-path');
+    const fotoPreview = document.getElementById('foto-preview');
+    const fotoPlaceholder = document.getElementById('foto-placeholder');
+    const fotoStatus = document.getElementById('foto-status');
+    const fotoDisabledHint = document.getElementById('foto-disabled-hint');
+    const btnPickFoto = document.getElementById('btn-pick-foto');
+    const btnUploadFoto = document.getElementById('btn-upload-foto');
+    let selectedFotoFile = null;
+
+    function setFotoPreview(src) {
+        if (src) {
+            fotoPreview.src = src;
+            fotoPreview.classList.remove('hidden');
+            fotoPlaceholder.classList.add('hidden');
+        } else {
+            fotoPreview.removeAttribute('src');
+            fotoPreview.classList.add('hidden');
+            fotoPlaceholder.classList.remove('hidden');
+        }
+    }
+
+    function setFotoControls(enabled, fotoUrl = '') {
+        fotoPathInput.value = fotoUrl || '';
+        btnPickFoto.disabled = !enabled;
+        btnUploadFoto.disabled = !enabled || !selectedFotoFile;
+        fotoDisabledHint.textContent = enabled
+            ? 'Ambil foto dari kamera ponsel atau pilih dari galeri, lalu upload.'
+            : 'Simpan atau load NIBAR terlebih dahulu sebelum mengambil foto.';
+        if (fotoUrl) {
+            setFotoPreview(fotoUrl);
+            fotoStatus.textContent = `Foto tersimpan: ${fotoUrl}`;
+        } else if (!selectedFotoFile) {
+            setFotoPreview('');
+            fotoStatus.textContent = enabled ? 'Belum ada foto tersimpan.' : '';
+        }
+    }
 
     async function loadEntry(nibar) {
         if (!nibar) return;
@@ -67,6 +105,9 @@
                         }
                     }
                 }
+                selectedFotoFile = null;
+                fotoInput.value = '';
+                setFotoControls(true, data.foto || '');
                 document.querySelectorAll('ul[data-similar-list]').forEach(ul => ul.innerHTML = '');
                 window.scrollTo({top: 0, behavior: 'smooth'});
             }
@@ -77,13 +118,16 @@
 
     btnReset.addEventListener('click', () => {
         currentEditNibar = null;
-        pageTitle.textContent = 'New Entry';
-        pageSubtitle.textContent = 'Add a new inventory item';
+        pageTitle.textContent = 'Add / Edit Item';
+        pageSubtitle.textContent = 'Add a new inventory item or load an existing NIBAR for focused editing';
         btnSubmit.textContent = 'Save Entry';
         btnReset.classList.add('hidden');
         nibarInput.readOnly = false;
         nibarInput.classList.remove('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
         form.reset();
+        selectedFotoFile = null;
+        fotoInput.value = '';
+        setFotoControls(false);
         document.querySelectorAll('select').forEach(sel => {
             if (sel.tomselect) sel.tomselect.clear();
         });
@@ -94,6 +138,55 @@
         if (!currentEditNibar && nibarInput.value) {
             loadEntry(nibarInput.value);
         }
+    });
+
+    if (params.get('nibar')) {
+        await loadEntry(params.get('nibar'));
+        if (params.get('saved') === 'created') {
+            fotoStatus.textContent = 'Entry created. You can upload a photo now.';
+        } else if (params.get('saved') === 'updated') {
+            fotoStatus.textContent = 'Entry updated. You can replace the photo if needed.';
+        }
+    } else {
+        setFotoControls(false);
+    }
+
+    btnPickFoto.addEventListener('click', () => {
+        if (!currentEditNibar) return;
+        fotoInput.click();
+    });
+
+    fotoInput.addEventListener('change', () => {
+        selectedFotoFile = fotoInput.files && fotoInput.files[0] ? fotoInput.files[0] : null;
+        if (!selectedFotoFile) {
+            setFotoControls(Boolean(currentEditNibar), fotoPathInput.value);
+            return;
+        }
+        const previewUrl = URL.createObjectURL(selectedFotoFile);
+        setFotoPreview(previewUrl);
+        fotoStatus.textContent = `Ready to upload: ${selectedFotoFile.name}`;
+        btnUploadFoto.disabled = !currentEditNibar;
+    });
+
+    btnUploadFoto.addEventListener('click', async () => {
+        if (!currentEditNibar || !selectedFotoFile) return;
+        fotoStatus.textContent = 'Uploading photo...';
+        btnUploadFoto.disabled = true;
+        const uploadData = new FormData();
+        uploadData.append('foto', selectedFotoFile);
+        const r = await fetch(`/api/inventory/${currentEditNibar}/foto`, {
+            method: 'POST',
+            body: uploadData,
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+            fotoStatus.textContent = data.error || `Photo upload failed (${r.status})`;
+            btnUploadFoto.disabled = false;
+            return;
+        }
+        selectedFotoFile = null;
+        fotoInput.value = '';
+        setFotoControls(true, data.foto || '');
     });
 
     // Similar-name lookup
@@ -156,7 +249,9 @@
         });
         
         if (r.status === 201 || (r.status === 200 && currentEditNibar)) {
-            window.location.href = '/';
+            const nibar = currentEditNibar || payload.nibar;
+            const saved = currentEditNibar ? 'updated' : 'created';
+            window.location.href = `/entry?nibar=${encodeURIComponent(nibar)}&saved=${saved}`;
             return;
         }
         const data = await r.json().catch(() => ({}));

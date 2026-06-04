@@ -1,21 +1,55 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — KIB-E{% endblock %}
 {% block content %}
-<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
     <div>
         <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
-        <p class="text-slate-500 text-sm mt-1">Overview of inventory items</p>
+        <p class="text-slate-500 text-sm mt-1">Inventory completion queues and progress</p>
     </div>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
-        <input id="filter" type="text" placeholder="Cari NIBAR atau Judul..."
-               class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm w-80 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm">
-    </div>
+    <a href="/master" class="w-full sm:w-auto px-4 py-2 text-center text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 shadow-sm transition-colors">Open Inventory Editor</a>
 </div>
-<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-    <div id="grid" class="w-full"></div>
+
+<div id="dashboard-loading" class="bg-white rounded-lg border border-slate-100 shadow-sm p-6 text-sm text-slate-500">
+    Loading inventory progress...
+</div>
+
+<div id="dashboard-content" class="hidden space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <section class="bg-white rounded-lg border border-slate-100 shadow-sm p-5">
+            <div class="text-xs uppercase tracking-wide font-semibold text-slate-500">Total Items</div>
+            <div id="stat-total" class="text-3xl font-bold text-slate-900 mt-2">0</div>
+        </section>
+        <section class="bg-white rounded-lg border border-slate-100 shadow-sm p-5">
+            <div class="text-xs uppercase tracking-wide font-semibold text-slate-500">Complete</div>
+            <div id="stat-complete" class="text-3xl font-bold text-emerald-700 mt-2">0</div>
+        </section>
+        <section class="bg-white rounded-lg border border-slate-100 shadow-sm p-5">
+            <div class="text-xs uppercase tracking-wide font-semibold text-slate-500">Incomplete</div>
+            <div id="stat-incomplete" class="text-3xl font-bold text-amber-700 mt-2">0</div>
+        </section>
+        <section class="bg-white rounded-lg border border-slate-100 shadow-sm p-5">
+            <div class="text-xs uppercase tracking-wide font-semibold text-slate-500">Completion</div>
+            <div id="stat-rate" class="text-3xl font-bold text-slate-900 mt-2">0%</div>
+        </section>
+    </div>
+
+    <section class="bg-white rounded-lg border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+                <h2 class="font-semibold text-slate-800">Work Queues</h2>
+                <p class="text-sm text-slate-500 mt-1">Open a focused editable view in Inventory Editor.</p>
+            </div>
+        </div>
+        <div id="queue-list" class="divide-y divide-slate-100"></div>
+    </section>
+
+    <section class="bg-white rounded-lg border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+            <h2 class="font-semibold text-slate-800">Missing Fields</h2>
+            <p class="text-sm text-slate-500 mt-1">All optional fields count toward completion in this version.</p>
+        </div>
+        <div id="missing-field-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-px bg-slate-100"></div>
+    </section>
 </div>
 {% endblock %}
 {% block scripts %}

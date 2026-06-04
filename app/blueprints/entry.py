@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from ..models import JENIS_ASET, STATUS_KEBERADAAN, YA_TIDAK, ADA_TIDAK, PENGGUNAAN
+from ..models import ADA_TIDAK, PENGGUNAAN, YA_TIDAK
 
 bp = Blueprint("entry", __name__)
 
@@ -10,8 +10,6 @@ def new_entry():
         "new_entry.html",
         active="entry",
         enums={
-            "jenis_aset": sorted(JENIS_ASET),
-            "status_keberadaan": sorted(STATUS_KEBERADAAN),
             "merupakan_atribusi": sorted(YA_TIDAK),
             "bast": sorted(ADA_TIDAK),
             "penggunaan": sorted(PENGGUNAAN),

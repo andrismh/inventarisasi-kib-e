@@ -11,6 +11,12 @@ from ..models import (
     MasterRuang,
     MasterSatuan,
 )
+from .inventory_defaults import (
+    apply_defaults_to_item,
+    apply_inventory_defaults,
+    default_ruangan_id,
+    default_satuan_id,
+)
 
 WORKSHEET_NAME = "Worksheet"
 MASTER_SHEETS = {
@@ -100,8 +106,8 @@ def _load_worksheet(wb):
         kondisi_nama = _norm(cells[19])
 
         kode_barang_id = barang.get(kode_barang_nama)
-        satuan_barang_id = satuan.get(satuan_nama)
-        ruangan_id = ruang.get(ruang_nama) if ruang_nama else None
+        satuan_barang_id = satuan.get(satuan_nama) or default_satuan_id()
+        ruangan_id = (ruang.get(ruang_nama) if ruang_nama else None) or default_ruangan_id()
         kondisi_barang_id = kondisi.get(kondisi_nama)
 
         # Required FKs missing -> skip row to keep schema invariants
@@ -109,41 +115,42 @@ def _load_worksheet(wb):
             skipped += 1
             continue
 
-        item = InventoryItem(
-            nibar=nibar,
-            kode_register=str(_norm(cells[1]) or ""),
-            kode_barang_id=kode_barang_id,
-            tahun_perolehan=_to_int(cells[3]) or 0,
-            nilai_perolehan=_to_int(cells[4]) or 0,
-            spesifikasi=_norm(cells[5]),
-            jenis_aset=str(_norm(cells[6]) or "BUKU"),
-            judul_buku=_norm(cells[7]),
-            pencipta_buku=_norm(cells[8]),
-            spesifikasi_buku=_norm(cells[9]),
-            jumlah_barang=_to_int(cells[10]) or 1,
-            satuan_barang_id=satuan_barang_id,
-            status_keberadaan=_norm(cells[12]),
-            jml_keberadaan=_to_int(cells[13]),
-            merupakan_atribusi=_norm(cells[14]),
-            nibar_atribusi=_to_int(cells[15]),
-            alamat=_norm(cells[16]),
-            koordinat=_norm(cells[17]) if cells[17] is None else str(_norm(cells[17])),
-            ruangan_id=ruangan_id,
-            kondisi_barang_id=kondisi_barang_id,
-            merk_type=_norm(cells[20]),
-            penggunaan=_norm(cells[21]),
-            nama_kuasa=_norm(cells[22]),
-            nama_pemakai=_norm(cells[23]),
-            status_pemakai=_norm(cells[24]),
-            bast=_norm(cells[25]),
-            nama_dasar_penggunaan=_norm(cells[26]),
-            nama_dokumen=_norm(cells[27]),
-            nibar_tercatat_ganda=_norm(cells[28]) and str(_norm(cells[28])),
-            deskripsi_barang=_norm(cells[29]),
-            keterangan=_norm(cells[30]),
-            petugas=_norm(cells[31]),
-            foto=_norm(cells[32]) and str(_norm(cells[32])),
-        )
+        values = apply_inventory_defaults({
+            "nibar": nibar,
+            "kode_register": str(_norm(cells[1]) or ""),
+            "kode_barang_id": kode_barang_id,
+            "tahun_perolehan": _to_int(cells[3]) or 0,
+            "nilai_perolehan": _to_int(cells[4]) or 0,
+            "spesifikasi": _norm(cells[5]),
+            "jenis_aset": _norm(cells[6]),
+            "judul_buku": _norm(cells[7]),
+            "pencipta_buku": _norm(cells[8]),
+            "spesifikasi_buku": _norm(cells[9]),
+            "jumlah_barang": _to_int(cells[10]),
+            "satuan_barang_id": satuan_barang_id,
+            "status_keberadaan": _norm(cells[12]),
+            "jml_keberadaan": _to_int(cells[13]),
+            "merupakan_atribusi": _norm(cells[14]),
+            "nibar_atribusi": _to_int(cells[15]),
+            "alamat": _norm(cells[16]),
+            "koordinat": _norm(cells[17]) if cells[17] is None else str(_norm(cells[17])),
+            "ruangan_id": ruangan_id,
+            "kondisi_barang_id": kondisi_barang_id,
+            "merk_type": _norm(cells[20]),
+            "penggunaan": _norm(cells[21]),
+            "nama_kuasa": _norm(cells[22]),
+            "nama_pemakai": _norm(cells[23]),
+            "status_pemakai": _norm(cells[24]),
+            "bast": _norm(cells[25]),
+            "nama_dasar_penggunaan": _norm(cells[26]),
+            "nama_dokumen": _norm(cells[27]),
+            "nibar_tercatat_ganda": _norm(cells[28]) and str(_norm(cells[28])),
+            "deskripsi_barang": _norm(cells[29]),
+            "keterangan": _norm(cells[30]),
+            "petugas": _norm(cells[31]),
+            "foto": _norm(cells[32]) and str(_norm(cells[32])),
+        })
+        item = InventoryItem(**values)
         db.session.add(item)
         inserted += 1
         if inserted % 500 == 0:
@@ -158,20 +165,22 @@ def seed_from_excel(path: Path):
         raise FileNotFoundError(f"Excel seed file not found at {path}")
 
     wb = load_workbook(filename=str(path), read_only=True, data_only=True)
+    try:
+        counts = {}
+        for sheet_name, model in MASTER_SHEETS.items():
+            # purge existing rows so re-seeding is idempotent
+            model.query.delete()
+            counts[model.__name__] = _load_master(wb, sheet_name, model)
 
-    counts = {}
-    for sheet_name, model in MASTER_SHEETS.items():
-        # purge existing rows so re-seeding is idempotent
-        model.query.delete()
-        counts[model.__name__] = _load_master(wb, sheet_name, model)
+        InventoryItem.query.delete()
+        inserted, skipped = _load_worksheet(wb)
+        counts["InventoryItem"] = inserted
+        counts["_skipped"] = skipped
 
-    InventoryItem.query.delete()
-    inserted, skipped = _load_worksheet(wb)
-    counts["InventoryItem"] = inserted
-    counts["_skipped"] = skipped
-
-    db.session.commit()
-    return counts
+        db.session.commit()
+        return counts
+    finally:
+        wb.close()
 
 
 def register_cli(app):
@@ -185,3 +194,13 @@ def register_cli(app):
             label = "skipped rows" if k == "_skipped" else f"Loaded {k}"
             click.echo(f"  {label}: {v}")
         click.echo("Done.")
+
+    @app.cli.command("backfill-inventory-defaults")
+    def _backfill_defaults_cmd():
+        """Fill blank inventory defaults without overwriting existing values."""
+        changed = 0
+        for item in InventoryItem.query.order_by(InventoryItem.nibar):
+            if apply_defaults_to_item(item):
+                changed += 1
+        db.session.commit()
+        click.echo(f"Backfilled defaults for {changed} inventory rows.")
