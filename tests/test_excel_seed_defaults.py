@@ -40,7 +40,7 @@ class ExcelSeedDefaultsTest(unittest.TestCase):
                 "MASTER RUANG": [
                     "10531 - GEDUNG UNIT IV > GEDUNG UNIT IV LANTAI 3 > RUANG RAPAT F BIDANG PENGELOLA BMD"
                 ],
-                "MASTER BARANG": ["01 - Buku"],
+                "MASTER BARANG": ["01 - Umum"],
             }.items():
                 ws = wb.create_sheet(sheet_name)
                 ws.append(["Nama"])
@@ -86,7 +86,7 @@ class ExcelSeedDefaultsTest(unittest.TestCase):
             ws.append([
                 4001,
                 "000001",
-                "01 - Buku",
+                "01 - Umum",
                 2026,
                 1000,
                 None,
@@ -116,7 +116,12 @@ class ExcelSeedDefaultsTest(unittest.TestCase):
                 self.assertEqual(item.jumlah_barang, 1)
                 self.assertEqual(item.satuan_barang.nama, "3 - Buah")
                 self.assertEqual(item.merupakan_atribusi, "tidak")
-                self.assertEqual(item.deskripsi_barang, "Judul Seed")
+                self.assertEqual(item.koordinat, "-7.794439738764821, 110.36759391147048")
+                self.assertEqual(item.status_pemakai, "Badan Pengelola Keuangan dan Aset DIY")
+                self.assertEqual(item.nibar_tercatat_ganda, "tidak")
+                self.assertIsNotNone(item.ruangan)
+                self.assertEqual(item.ruangan.kode, "10531")
+                self.assertEqual(item.deskripsi_barang, "Buku Umum")
                 self.assertEqual(item.keterangan, "Judul Seed")
 
 

@@ -24,7 +24,7 @@ class InventoryApiTest(unittest.TestCase):
         self.client = self.app.test_client()
         with self.app.app_context():
             db.create_all()
-            barang = MasterBarang(kode="01", nama="01 - Buku")
+            barang = MasterBarang(kode="01", nama="01 - Umum")
             satuan = MasterSatuan(kode="3", nama="3 - Buah")
             ruang = MasterRuang(
                 kode="10531",
@@ -183,14 +183,14 @@ class InventoryApiTest(unittest.TestCase):
         self.assertEqual(data["jumlah_barang"], 1)
         self.assertEqual(data["satuan_barang"], "3 - Buah")
         self.assertEqual(data["merupakan_atribusi"], "tidak")
-        self.assertEqual(data["koordinat"], "-7.794591775195839,110.36771893501283")
+        self.assertEqual(data["koordinat"], "-7.794439738764821, 110.36759391147048")
         self.assertIn("RUANG RAPAT F BIDANG PENGELOLA BMD", data["ruangan"])
         self.assertEqual(data["nama_kuasa"], "Badan Pengelola Keuangan dan Aset DIY")
-        self.assertEqual(data["nama_pemakai"], "Badan Pengelola Keuanagn dan Aset DIY")
-        self.assertEqual(data["status_pemakai"], "Ruang Rapat F Bidang PBD")
+        self.assertEqual(data["nama_pemakai"], "Badan Pengelola Keuangan dan Aset DIY")
+        self.assertEqual(data["status_pemakai"], "Badan Pengelola Keuangan dan Aset DIY")
         self.assertEqual(data["bast"], "tidak")
-        self.assertEqual(data["nibar_tercatat_ganda"], "Tidak")
-        self.assertEqual(data["deskripsi_barang"], "Buku Default")
+        self.assertEqual(data["nibar_tercatat_ganda"], "tidak")
+        self.assertEqual(data["deskripsi_barang"], "Buku Umum")
         self.assertEqual(data["keterangan"], "Buku Default")
 
     def test_create_special_nibar_uses_non_book_asset_default(self):
@@ -236,6 +236,21 @@ class InventoryApiTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json()["error"], "Unsupported image type")
+
+    def test_foto_upload_rejects_too_large_file(self):
+        response = self.client.post(
+            "/api/inventory/1001/foto",
+            data={
+                "foto": (
+                    io.BytesIO(b"x" * (TestConfig.MAX_FOTO_UPLOAD_BYTES + 1)),
+                    "capture.jpg",
+                )
+            },
+            content_type="multipart/form-data",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json()["error"], "Photo file is too large")
 
     def test_foto_upload_saves_file_and_updates_inventory_path(self):
         response = self.client.post(

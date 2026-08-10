@@ -13,6 +13,31 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    const toast = (message, type = 'error') => {
+        const el = document.createElement('div');
+        el.className = 'fixed bottom-24 right-4 z-50 max-w-sm px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' +
+            (type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white');
+        el.textContent = message;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    };
+
+    const isBlank = (value) =>
+        value === null || value === undefined || String(value).trim() === '';
+
+    const highlightBlanks = (row) => {
+        const el = row.getElement();
+        if (!el) return;
+        const data = row.getData();
+        el.querySelectorAll('.tabulator-cell').forEach((cellEl) => {
+            const field = cellEl.getAttribute('tabulator-field');
+            if (field && isBlank(data[field])) {
+                cellEl.classList.add('kibe-blank-cell');
+            } else {
+                cellEl.classList.remove('kibe-blank-cell');
+            }
+        });
+    };
 
     const queueLabels = {
         all_optional: 'Any missing optional field',
@@ -62,6 +87,14 @@
         barang: toMap(barang), satuan: toMap(satuan),
         ruang: toMap(ruang), kondisi: toMap(kondisi),
     };
+    const labelSorter = (masterKey) => {
+        const map = masterMaps[masterKey];
+        return (a, b) => {
+            const av = a == null ? '' : (map[a] != null ? map[a] : String(a));
+            const bv = b == null ? '' : (map[b] != null ? map[b] : String(b));
+            return av.localeCompare(bv, 'id', {numeric: true});
+        };
+    };
     const listEditor = (rows, allowEmpty = false) => ({
         editor: 'list',
         editorParams: {
@@ -85,38 +118,39 @@
     });
 
     const columns = [
-        {title: 'NIBAR', field: 'nibar', frozen: true, width: 120, editor: false},
-        {title: 'Kode Reg.', field: 'kode_register', editor: 'input', width: 110},
-        {title: 'Kode Barang', field: 'kode_barang_id', masterKey: 'barang', width: 240, ...listEditor(barang)},
-        {title: 'Tahun', field: 'tahun_perolehan', editor: 'number', width: 90},
-        {title: 'Nilai (Rp)', field: 'nilai_perolehan', editor: 'number', width: 120},
-        {title: 'Asal Usul', field: 'spesifikasi', editor: 'input', width: 140},
-        {title: 'Jenis Aset', field: 'jenis_aset', width: 200, ...enumEditor(['BUKU', 'BARANG BERCORAK KESENIAN', 'HEWAN & TUMBUHAN'])},
-        {title: 'Judul Buku', field: 'judul_buku', editor: 'input', width: 280},
-        {title: 'Pencipta', field: 'pencipta_buku', editor: 'input', width: 180},
-        {title: 'Spesifikasi Buku', field: 'spesifikasi_buku', editor: 'input', width: 180},
-        {title: 'Jumlah', field: 'jumlah_barang', editor: 'number', width: 90},
-        {title: 'Satuan', field: 'satuan_barang_id', masterKey: 'satuan', width: 140, ...listEditor(satuan)},
-        {title: 'Atribusi?', field: 'merupakan_atribusi', width: 110, ...enumEditor(['ya', 'tidak'])},
-        {title: 'Alamat', field: 'alamat', editor: 'input', width: 200},
-        {title: 'Koordinat', field: 'koordinat', editor: 'input', width: 160},
-        {title: 'Ruangan', field: 'ruangan_id', masterKey: 'ruang', width: 280, ...listEditor(ruang, true)},
-        {title: 'Kondisi', field: 'kondisi_barang_id', masterKey: 'kondisi', width: 160, ...listEditor(kondisi)},
-        {title: 'Merk/Type', field: 'merk_type', editor: 'input', width: 160},
-        {title: 'Penggunaan', field: 'penggunaan', width: 200, ...enumEditor(['pemerintah daerah', 'pemerintah pusat', 'pemerintah daerah lainnya', 'pihak lain'])},
-        {title: 'Nama Kuasa', field: 'nama_kuasa', editor: 'input', width: 160},
-        {title: 'Nama Pemakai', field: 'nama_pemakai', editor: 'input', width: 160},
-        {title: 'Status Pemakai', field: 'status_pemakai', editor: 'input', width: 140},
-        {title: 'BAST', field: 'bast', width: 90, ...enumEditor(['ada', 'tidak'])},
-        {title: 'Tercatat Ganda', field: 'nibar_tercatat_ganda', editor: 'input', width: 140},
-        {title: 'Deskripsi', field: 'deskripsi_barang', editor: 'input', width: 200},
-        {title: 'Keterangan', field: 'keterangan', editor: 'input', width: 200},
-        {title: 'Petugas', field: 'petugas', editor: 'input', width: 180},
+        {title: 'NIBAR', field: 'nibar', frozen: true, width: 120, editor: false, sorter: 'number'},
+        {title: 'Kode Reg.', field: 'kode_register', editor: 'input', width: 110, sorter: 'string'},
+        {title: 'Kode Barang', field: 'kode_barang_id', masterKey: 'barang', width: 240, sorter: labelSorter('barang'), ...listEditor(barang)},
+        {title: 'Tahun', field: 'tahun_perolehan', editor: 'number', width: 90, sorter: 'number'},
+        {title: 'Nilai (Rp)', field: 'nilai_perolehan', editor: 'number', width: 120, sorter: 'number'},
+        {title: 'Asal Usul', field: 'spesifikasi', editor: 'input', width: 140, sorter: 'string'},
+        {title: 'Jenis Aset', field: 'jenis_aset', width: 200, sorter: 'string', ...enumEditor(['BUKU', 'BARANG BERCORAK KESENIAN', 'HEWAN & TUMBUHAN'])},
+        {title: 'Judul Buku', field: 'judul_buku', editor: 'input', width: 280, sorter: 'string'},
+        {title: 'Pencipta', field: 'pencipta_buku', editor: 'input', width: 180, sorter: 'string'},
+        {title: 'Spesifikasi Buku', field: 'spesifikasi_buku', editor: 'input', width: 180, sorter: 'string'},
+        {title: 'Jumlah', field: 'jumlah_barang', editor: 'number', width: 90, sorter: 'number'},
+        {title: 'Satuan', field: 'satuan_barang_id', masterKey: 'satuan', width: 140, sorter: labelSorter('satuan'), ...listEditor(satuan)},
+        {title: 'Atribusi?', field: 'merupakan_atribusi', width: 110, sorter: 'string', ...enumEditor(['ya', 'tidak'])},
+        {title: 'Alamat', field: 'alamat', editor: 'input', width: 200, sorter: 'string'},
+        {title: 'Koordinat', field: 'koordinat', editor: 'input', width: 160, sorter: 'string'},
+        {title: 'Ruangan', field: 'ruangan_id', masterKey: 'ruang', width: 280, sorter: labelSorter('ruang'), ...listEditor(ruang, true)},
+        {title: 'Kondisi', field: 'kondisi_barang_id', masterKey: 'kondisi', width: 160, sorter: labelSorter('kondisi'), ...listEditor(kondisi)},
+        {title: 'Merk/Type', field: 'merk_type', editor: 'input', width: 160, sorter: 'string'},
+        {title: 'Penggunaan', field: 'penggunaan', width: 200, sorter: 'string', ...enumEditor(['pemerintah daerah', 'pemerintah pusat', 'pemerintah daerah lainnya', 'pihak lain'])},
+        {title: 'Nama Kuasa', field: 'nama_kuasa', editor: 'input', width: 160, sorter: 'string'},
+        {title: 'Nama Pemakai', field: 'nama_pemakai', editor: 'input', width: 160, sorter: 'string'},
+        {title: 'Status Pemakai', field: 'status_pemakai', editor: 'input', width: 140, sorter: 'string'},
+        {title: 'BAST', field: 'bast', width: 90, sorter: 'string', ...enumEditor(['ada', 'tidak'])},
+        {title: 'Tercatat Ganda', field: 'nibar_tercatat_ganda', editor: 'input', width: 140, sorter: 'string'},
+        {title: 'Deskripsi', field: 'deskripsi_barang', editor: 'input', width: 200, sorter: 'string'},
+        {title: 'Keterangan', field: 'keterangan', editor: 'input', width: 200, sorter: 'string'},
+        {title: 'Petugas', field: 'petugas', editor: 'input', width: 180, sorter: 'string'},
         {
             title: 'Foto',
             field: 'foto',
             editor: false,
             width: 160,
+            sorter: 'string',
             formatter: (cell) => {
                 const value = cell.getValue();
                 if (!value) return '';
@@ -131,9 +165,11 @@
         layout: 'fitData',
         height: 'calc(100vh - 170px)',
         index: 'nibar',
+        headerSort: true,
         pagination: true,
         paginationSize: 50,
         paginationSizeSelector: [25, 50, 100, 200],
+        rowFormatter: highlightBlanks,
         columns,
         rowContextMenu: [
             {
@@ -147,13 +183,14 @@
                         status.textContent = 'Deleted';
                     } else {
                         status.textContent = 'Delete failed';
-                        alert('Delete failed');
+                        toast('Delete failed');
                     }
                 },
             },
         ],
         cellEdited: async (cell) => {
-            const data = cell.getRow().getData();
+            const row = cell.getRow();
+            const data = row.getData();
             const field = cell.getField();
             const value = cell.getValue();
             status.textContent = 'Saving...';
@@ -168,11 +205,26 @@
                 const d = await r.json().catch(() => ({}));
                 status.textContent = 'Save failed';
                 status.className = 'text-sm font-medium px-4 py-1.5 rounded-full bg-rose-50 text-rose-700 shadow-sm border border-rose-200';
-                alert(d.error || `Update failed (${r.status})`);
+                toast(d.error || `Update failed (${r.status})`);
                 return;
             }
             status.textContent = 'Saved';
             status.className = 'text-sm font-medium px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-200';
+
+            // Live queue trimming: filling the exact queued field removes the row
+            // from a single-field "missing" view immediately; otherwise refresh
+            // the blank-cell highlight.
+            const queue = queueFilter.value;
+            if (queue && !queue.startsWith('duplicates:') && queue !== 'all_optional') {
+                if (!isBlank(value) && field === queue) {
+                    row.delete();
+                    status.textContent = `Saved — left in queue (${fmt.format(table.getDataCount())} rows)`;
+                    updateSubtitle();
+                    return;
+                }
+            }
+            highlightBlanks(row);
+
             setTimeout(() => {
                 if (status.textContent === 'Saved') {
                     status.textContent = `${fmt.format(table.getDataCount())} rows`;
@@ -183,6 +235,7 @@
     });
 
     async function loadRows() {
+        lastActiveRow = null;
         const queue = queueFilter.value;
         const q = filterInput.value.trim();
         const urlParams = new URLSearchParams();
@@ -232,6 +285,58 @@
     });
     queueFilter.addEventListener('change', loadRows);
     reloadButton.addEventListener('click', loadRows);
+
+    function updateSubtitle() {
+        const queue = queueFilter.value;
+        subtitle.textContent = queue
+            ? `${queueLabels[queue] || queue} (${fmt.format(table.getDataCount())} rows)`
+            : 'Full editable inventory grid';
+    }
+
+    let lastActiveRow = null;
+    table.on('rowClick', (e, row) => { lastActiveRow = row; });
+
+    function firstBlankField(row) {
+        const data = row.getData();
+        for (const col of table.getColumnDefinitions()) {
+            const f = col.field;
+            if (!f || col.editor === false) continue;
+            if (isBlank(data[f])) return f;
+        }
+        return null;
+    }
+
+    async function nextBlank() {
+        const rows = table.getRows('active');
+        if (!rows.length) return;
+        const start = lastActiveRow ? Math.max(rows.indexOf(lastActiveRow), 0) + 1 : 0;
+        for (let pass = 0; pass < 2; pass++) {
+            const begin = pass === 0 ? start : 0;
+            for (let i = begin; i < rows.length; i++) {
+                const field = firstBlankField(rows[i]);
+                if (!field) continue;
+                const cell = rows[i].getCell(field);
+                if (!cell) continue;
+                lastActiveRow = rows[i];
+                try {
+                    await rows[i].scrollTo();
+                } catch (e) {
+                    console.warn('Tidak dapat menggulir ke sel kosong.', e);
+                }
+                cell.edit();
+                return;
+            }
+        }
+        toast('Tidak ada lagi sel kosong yang tersisa.', 'success');
+    }
+
+    document.getElementById('next-blank').addEventListener('click', () => { void nextBlank(); });
+    document.addEventListener('keydown', (e) => {
+        if ((e.altKey || e.ctrlKey) && (e.key === 'n' || e.key === 'N')) {
+            e.preventDefault();
+            void nextBlank();
+        }
+    });
 
     await loadRows();
 })();

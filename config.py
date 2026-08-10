@@ -16,6 +16,8 @@ class Config:
     EXCEL_SEED_PATH = BASE_DIR / "Format_Excel_KIBE.xlsx"
     FOTO_UPLOAD_DIR = BASE_DIR / "app" / "static" / "foto"
     MAX_FOTO_UPLOAD_BYTES = int(os.environ.get("MAX_FOTO_UPLOAD_BYTES", 5 * 1024 * 1024))
+    FOTO_MAX_DIMENSION = int(os.environ.get("FOTO_MAX_DIMENSION", 1920))
+    FOTO_JPEG_QUALITY = float(os.environ.get("FOTO_JPEG_QUALITY", 0.8))
     FOTO_ALLOWED_MIME_TYPES = {
         "image/jpeg": ".jpg",
         "image/png": ".png",

@@ -199,5 +199,12 @@
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    window.KIBE_CONFIG = {
+        fotoMaxDimension: {{ config.get('FOTO_MAX_DIMENSION', 1920) | tojson }},
+        fotoJpegQuality: {{ config.get('FOTO_JPEG_QUALITY', 0.8) | tojson }},
+        fotoMaxUploadBytes: {{ config.get('MAX_FOTO_UPLOAD_BYTES', 5 * 1024 * 1024) | tojson }},
+    };
+</script>
 <script src="{{ url_for('static', filename='js/new_entry.js') }}"></script>
 {% endblock %}

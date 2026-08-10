@@ -9,6 +9,7 @@ class TestConfig:
     SECRET_KEY = "test"
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_FOTO_UPLOAD_BYTES = 123456
 
 
 class EntryPageTest(unittest.TestCase):
@@ -68,6 +69,7 @@ class EntryPageTest(unittest.TestCase):
         self.assertIn('accept="image/*"', html)
         self.assertIn('capture="environment"', html)
         self.assertIn('id="btn-upload-foto"', html)
+        self.assertIn("fotoMaxUploadBytes: 123456", html)
         self.assertIn("disabled", html)
         self.assertNotIn("Foto (path)", html)
 

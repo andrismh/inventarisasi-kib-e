@@ -63,6 +63,12 @@ db.sqlite3-journal
 # Flask stuff:
 .webassets-cache
 
+# Local AI-assistant tooling and task handoffs
+.mcp.json
+.pi-subagents/
+.serena/
+instruction.md
+
 # Scrapy stuff:
 .scrapy
 

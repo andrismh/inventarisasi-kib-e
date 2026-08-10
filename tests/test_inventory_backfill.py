@@ -18,7 +18,7 @@ class InventoryBackfillTest(unittest.TestCase):
         self.runner = self.app.test_cli_runner()
         with self.app.app_context():
             db.create_all()
-            barang = MasterBarang(kode="01", nama="01 - Buku")
+            barang = MasterBarang(kode="01", nama="01 - Umum")
             satuan = MasterSatuan(kode="3", nama="3 - Buah")
             ruang = MasterRuang(
                 kode="10531",
@@ -75,10 +75,12 @@ class InventoryBackfillTest(unittest.TestCase):
             self.assertEqual(filled.spesifikasi, "6-APBD")
             self.assertEqual(filled.jenis_aset, "BUKU")
             self.assertEqual(filled.merupakan_atribusi, "tidak")
-            self.assertEqual(filled.deskripsi_barang, "Judul Backfill")
+            self.assertEqual(filled.koordinat, "-7.794439738764821, 110.36759391147048")
+            self.assertEqual(filled.status_pemakai, "Badan Pengelola Keuangan dan Aset DIY")
+            self.assertEqual(filled.deskripsi_barang, "Buku Umum")
             self.assertEqual(filled.keterangan, "Judul Backfill")
             self.assertEqual(filled.bast, "tidak")
-            self.assertIn("RUANG RAPAT F BIDANG PENGELOLA BMD", filled.ruangan.nama)
+            self.assertEqual(filled.ruangan.kode, "10531")
 
             self.assertEqual(preserved.spesifikasi, "Existing")
             self.assertEqual(preserved.jumlah_barang, 2)

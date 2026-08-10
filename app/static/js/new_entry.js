@@ -52,7 +52,66 @@
     const btnUploadFoto = document.getElementById('btn-upload-foto');
     let selectedFotoFile = null;
 
-    function setFotoPreview(src) {
+    const kibeConfig = window.KIBE_CONFIG || {};
+    const positiveConfigNumber = (value, fallback) => {
+        const number = Number(value);
+        return Number.isFinite(number) && number > 0 ? number : fallback;
+    };
+    const FOTO_MAX_DIMENSION = positiveConfigNumber(kibeConfig.fotoMaxDimension, 1920);
+    const FOTO_MAX_UPLOAD_BYTES = positiveConfigNumber(
+        kibeConfig.fotoMaxUploadBytes,
+        5 * 1024 * 1024,
+    );
+    const configuredQuality = Number(kibeConfig.fotoJpegQuality);
+    const FOTO_JPEG_QUALITY = Number.isFinite(configuredQuality)
+        && configuredQuality >= 0 && configuredQuality <= 1
+        ? configuredQuality
+        : 0.8;
+    const COMPRESSIBLE_FOTO_MIME_TYPES = new Set([
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+    ]);
+    const formatFileSize = (bytes) => bytes < 1024 * 1024
+        ? `${Math.ceil(bytes / 1024)} KB`
+        : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
+    async function compressImage(file) {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        try {
+            await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = () => reject(new Error('Gagal membaca gambar'));
+                image.src = url;
+            });
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+
+        const largestDimension = Math.max(image.naturalWidth, image.naturalHeight);
+        if (!largestDimension) throw new Error('Ukuran gambar tidak valid');
+        const scale = Math.min(1, FOTO_MAX_DIMENSION / largestDimension);
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas tidak tersedia');
+        context.drawImage(image, 0, 0, width, height);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', FOTO_JPEG_QUALITY));
+        if (!blob) throw new Error('Kompresi foto gagal');
+        return new File([blob], 'foto.jpg', {type: 'image/jpeg', lastModified: Date.now()});
+    }
+
+    let previewObjectUrl = null;
+
+    function setFotoPreview(src, isObjectUrl = false) {
+        if (previewObjectUrl && previewObjectUrl !== src) {
+            URL.revokeObjectURL(previewObjectUrl);
+        }
+        previewObjectUrl = isObjectUrl ? src : null;
         if (src) {
             fotoPreview.src = src;
             fotoPreview.classList.remove('hidden');
@@ -163,30 +222,75 @@
             return;
         }
         const previewUrl = URL.createObjectURL(selectedFotoFile);
-        setFotoPreview(previewUrl);
-        fotoStatus.textContent = `Ready to upload: ${selectedFotoFile.name}`;
+        setFotoPreview(previewUrl, true);
+        const fileType = String(selectedFotoFile.type || '').toLowerCase();
+        const needsCompression = selectedFotoFile.size > FOTO_MAX_UPLOAD_BYTES;
+        fotoStatus.textContent = needsCompression && COMPRESSIBLE_FOTO_MIME_TYPES.has(fileType)
+            ? `${selectedFotoFile.name} (${formatFileSize(selectedFotoFile.size)}) akan dikompres saat diunggah.`
+            : `Siap diunggah: ${selectedFotoFile.name} (${formatFileSize(selectedFotoFile.size)})`;
         btnUploadFoto.disabled = !currentEditNibar;
     });
 
     btnUploadFoto.addEventListener('click', async () => {
         if (!currentEditNibar || !selectedFotoFile) return;
-        fotoStatus.textContent = 'Uploading photo...';
         btnUploadFoto.disabled = true;
-        const uploadData = new FormData();
-        uploadData.append('foto', selectedFotoFile);
-        const r = await fetch(`/api/inventory/${currentEditNibar}/foto`, {
-            method: 'POST',
-            body: uploadData,
-        });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) {
-            fotoStatus.textContent = data.error || `Photo upload failed (${r.status})`;
+
+        let uploadFile = selectedFotoFile;
+        let compressionNote = '';
+        let compressionFailed = false;
+        const originalSize = uploadFile.size;
+        const fileType = String(uploadFile.type || '').toLowerCase();
+        const needsCompression = originalSize > FOTO_MAX_UPLOAD_BYTES;
+        const canCompress = COMPRESSIBLE_FOTO_MIME_TYPES.has(fileType);
+
+        if (needsCompression && canCompress) {
+            fotoStatus.textContent = 'Mengompres foto sebelum diunggah...';
+            try {
+                const compressed = await compressImage(uploadFile);
+                if (compressed.size < originalSize) {
+                    uploadFile = compressed;
+                    compressionNote = `Foto dikompres (${formatFileSize(originalSize)} → ${formatFileSize(compressed.size)}).`;
+                }
+            } catch (e) {
+                compressionFailed = true;
+                console.warn('Foto tidak dapat dikompres; mencoba unggah file asli.', e);
+                fotoStatus.textContent = 'Kompresi foto gagal; mencoba mengunggah file asli...';
+            }
+        } else {
+            fotoStatus.textContent = 'Mengunggah foto...';
+        }
+
+        if (needsCompression && canCompress && !compressionFailed && uploadFile.size > FOTO_MAX_UPLOAD_BYTES) {
+            fotoStatus.textContent = compressionNote
+                ? `Foto hasil kompresi (${formatFileSize(uploadFile.size)}) masih melebihi batas ${formatFileSize(FOTO_MAX_UPLOAD_BYTES)}.`
+                : `Kompresi tidak dapat mengurangi foto di bawah batas ${formatFileSize(FOTO_MAX_UPLOAD_BYTES)}.`;
             btnUploadFoto.disabled = false;
             return;
         }
-        selectedFotoFile = null;
-        fotoInput.value = '';
-        setFotoControls(true, data.foto || '');
+
+        const uploadData = new FormData();
+        uploadData.append('foto', uploadFile);
+        try {
+            const r = await fetch(`/api/inventory/${currentEditNibar}/foto`, {
+                method: 'POST',
+                body: uploadData,
+            });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                fotoStatus.textContent = data.error || `Unggah foto gagal (${r.status})`;
+                btnUploadFoto.disabled = false;
+                return;
+            }
+            selectedFotoFile = null;
+            fotoInput.value = '';
+            setFotoControls(true, data.foto || '');
+            if (compressionNote) {
+                fotoStatus.textContent = `${compressionNote} Foto tersimpan: ${data.foto || ''}`;
+            }
+        } catch (e) {
+            fotoStatus.textContent = 'Gagal mengunggah foto: ' + (e.message || e);
+            btnUploadFoto.disabled = false;
+        }
     });
 
     // Similar-name lookup
