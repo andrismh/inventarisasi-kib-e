@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import func, cast, String
+from sqlalchemy import func, cast, String, or_
 from ..models import InventoryItem
 
 bp = Blueprint("api_search", __name__, url_prefix="/api/inventory")
@@ -17,18 +17,28 @@ def search():
     if len(q) < 2:
         return jsonify({"matches": []})
 
-    if field == "judul":
+    if field in ("judul", "pencipta"):
         query = InventoryItem.query.filter(
-            func.lower(InventoryItem.judul_buku).like(f"%{q.lower()}%")
+            or_(
+                func.lower(InventoryItem.judul_buku).like(f"%{q.lower()}%"),
+                func.lower(InventoryItem.pencipta_buku).like(f"%{q.lower()}%"),
+            )
         )
     elif field == "nibar":
         query = InventoryItem.query.filter(
             cast(InventoryItem.nibar, String).like(f"{q}%")
         )
     else:
-        return jsonify({"error": "field must be 'judul' or 'nibar'"}), 400
+        return jsonify({"error": "field must be 'judul', 'pencipta', or 'nibar'"}), 400
 
     rows = query.limit(limit).all()
     return jsonify({
-        "matches": [{"nibar": r.nibar, "judul_buku": r.judul_buku} for r in rows]
+        "matches": [
+            {
+                "nibar": r.nibar,
+                "judul_buku": r.judul_buku,
+                "pencipta_buku": r.pencipta_buku,
+            }
+            for r in rows
+        ]
     })

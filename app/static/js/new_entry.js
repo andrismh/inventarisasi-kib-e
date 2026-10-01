@@ -147,7 +147,8 @@
                 const data = await r.json();
                 currentEditNibar = data.nibar;
                 pageTitle.textContent = 'Edit Entry';
-                pageSubtitle.textContent = `Editing NIBAR: ${data.nibar} - ${data.judul_buku || ''}`;
+                const creatorPart = data.pencipta_buku ? ` — ${data.pencipta_buku}` : '';
+                pageSubtitle.textContent = `Editing NIBAR: ${data.nibar} - ${data.judul_buku || ''}${creatorPart}`;
                 btnSubmit.textContent = 'Update Entry';
                 btnReset.classList.remove('hidden');
                 nibarInput.readOnly = true;
@@ -319,7 +320,11 @@
                 const a = document.createElement('a');
                 a.href = '#';
                 a.className = 'hover:text-emerald-600 underline decoration-slate-300 hover:decoration-emerald-500 transition-colors cursor-pointer';
-                a.textContent = `${m.nibar} — ${m.judul_buku ?? ''}`;
+                const creator = (m.pencipta_buku || '').trim();
+                const title = (m.judul_buku || '').trim();
+                a.textContent = creator
+                    ? `${m.nibar} — ${title || '—'} — ${creator}`
+                    : `${m.nibar} — ${title || '—'}`;
                 a.addEventListener('click', (e) => {
                     e.preventDefault();
                     loadEntry(m.nibar);

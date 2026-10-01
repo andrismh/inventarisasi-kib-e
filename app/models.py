@@ -89,6 +89,7 @@ class InventoryItem(db.Model):
 
     __table_args__ = (
         Index("ix_inventory_item_judul_lower", func.lower(judul_buku)),
+        Index("ix_inventory_item_pencipta_lower", func.lower(pencipta_buku)),
     )
 
     def to_dict(self, fields=None):

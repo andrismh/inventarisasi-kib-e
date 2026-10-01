@@ -73,6 +73,16 @@ class EntryPageTest(unittest.TestCase):
         self.assertIn("disabled", html)
         self.assertNotIn("Foto (path)", html)
 
+    def test_entry_page_has_similar_lookup_for_judul_and_pencipta(self):
+        response = self.client.get("/entry")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn('data-similar="judul"', html)
+        self.assertIn('data-similar-list="judul"', html)
+        self.assertIn('data-similar="pencipta"', html)
+        self.assertIn('data-similar-list="pencipta"', html)
+
 
 if __name__ == "__main__":
     unittest.main()

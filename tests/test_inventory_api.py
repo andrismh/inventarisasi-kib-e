@@ -285,6 +285,41 @@ class InventoryApiTest(unittest.TestCase):
         self.assertFalse((Path(self.upload_dir.name) / "1001.jpg").exists())
         self.assertTrue((Path(self.upload_dir.name) / "1001.webp").exists())
 
+    def test_search_by_title_and_pencipta(self):
+        # Search matching title
+        res = self.client.get("/api/inventory/search?q=Atlas&field=judul")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(len(data["matches"]), 2)
+        self.assertIn("pencipta_buku", data["matches"][0])
+
+        # Search matching pencipta/author
+        res = self.client.get("/api/inventory/search?q=Tim&field=judul")
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(len(data["matches"]), 1)
+        self.assertEqual(data["matches"][0]["nibar"], 1002)
+        self.assertEqual(data["matches"][0]["pencipta_buku"], "Tim")
+
+        # Search with field=pencipta
+        res = self.client.get("/api/inventory/search?q=Tim&field=pencipta")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.get_json()["matches"]), 1)
+
+        # Search with field=nibar
+        res = self.client.get("/api/inventory/search?q=1002&field=nibar")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.get_json()["matches"]), 1)
+
+        # Short query (< 2 chars)
+        res = self.client.get("/api/inventory/search?q=a&field=judul")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.get_json()["matches"], [])
+
+        # Invalid field
+        res = self.client.get("/api/inventory/search?q=test&field=invalid")
+        self.assertEqual(res.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()
