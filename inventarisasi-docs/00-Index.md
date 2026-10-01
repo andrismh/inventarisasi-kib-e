@@ -22,7 +22,7 @@ The source-of-truth Excel file holds ~1,632 inventory rows in a single `Workshee
 | Database    | SQLite (`instance/inventory.db`)             |
 | Frontend    | Server-rendered Jinja + Tailwind CDN (Inter) |
 | Grid        | Tabulator (CDN) — read-only & editable grids |
-| Seed source | `Format_Excel_KIBE.xlsx` via `openpyxl`      |
+| Seed source | `assets/templates/Format_Excel_KIBE.xlsx` via `openpyxl` |
 
 ## Top-level navigation
 

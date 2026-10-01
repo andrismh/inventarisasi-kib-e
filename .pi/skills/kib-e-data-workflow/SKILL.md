@@ -18,7 +18,7 @@ $env:FLASK_APP = "run.py"
 
 | Command | What it does |
 |---|---|
-| `flask seed-from-excel` | Purges all tables and reloads masters + inventory from `Format_Excel_KIBE.xlsx` (idempotent). Prints counts. |
+| `flask seed-from-excel` | Purges all tables and reloads masters + inventory from `assets/templates/Format_Excel_KIBE.xlsx` (idempotent). Prints counts. |
 | `flask backfill-inventory-defaults` | Fills blank default fields on existing rows; **never overwrites** non-blank values. |
 | `flask db upgrade` | Applies pending migrations (needed once after a fresh clone). |
 | `flask db migrate -m "..."` | Generates a migration after editing `app/models.py`. |

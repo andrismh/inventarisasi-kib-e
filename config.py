@@ -13,7 +13,7 @@ class Config:
         f"sqlite:///{INSTANCE_DIR / 'inventory.db'}",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    EXCEL_SEED_PATH = BASE_DIR / "Format_Excel_KIBE.xlsx"
+    EXCEL_SEED_PATH = BASE_DIR / "assets" / "templates" / "Format_Excel_KIBE.xlsx"
     FOTO_UPLOAD_DIR = BASE_DIR / "app" / "static" / "foto"
     MAX_FOTO_UPLOAD_BYTES = int(os.environ.get("MAX_FOTO_UPLOAD_BYTES", 5 * 1024 * 1024))
     FOTO_MAX_DIMENSION = int(os.environ.get("FOTO_MAX_DIMENSION", 1920))

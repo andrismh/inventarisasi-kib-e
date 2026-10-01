@@ -46,7 +46,7 @@ inventarisasi-kib-e/
 ├── instance/inventory.db      # gitignored
 ├── migrations/                # Flask-Migrate
 ├── inventarisasi-docs/        # this vault
-├── Format_Excel_KIBE.xlsx     # seed source
+├── assets/templates/Format_Excel_KIBE.xlsx  # seed source (tracked)
 ├── config.py
 ├── run.py
 └── requirements.txt

@@ -5,7 +5,7 @@ Local development on Windows. Commands shown for PowerShell.
 ## Prerequisites
 
 - Python 3.11+ (a `venv/` already exists in the project root — reuse it).
-- The seed file `Format_Excel_KIBE.xlsx` at the project root.
+- The seed file `assets/templates/Format_Excel_KIBE.xlsx` (tracked in git).
 - A modern browser (Chrome, Edge, Firefox).
 
 No Node.js is needed — Tailwind and Tabulator are loaded from CDNs.

@@ -10,7 +10,7 @@ description: KIB-E inventory domain reference for this project — the 33-column
 Government asset inventory for asset class **KIB-E** — *Buku* (books),
 *Barang Bercorak Kesenian* (art), *Hewan & Tumbuhan* (animals & plants) — for
 **Badan Pengelola Keuangan dan Aset DIY** (Yogyakarta). It replaces the
-manual Excel workflow in `Format_Excel_KIBE.xlsx` (root of repo; **never
+manual Excel workflow in `assets/templates/Format_Excel_KIBE.xlsx` (**never
 written to**, seed source only).
 
 Source of truth files: `app/models.py`, `app/services/inventory_defaults.py`,

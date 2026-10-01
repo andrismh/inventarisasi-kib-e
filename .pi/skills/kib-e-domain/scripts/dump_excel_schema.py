@@ -9,14 +9,14 @@ Reads Format_Excel_KIBE.xlsx (read-only) and prints:
 Usage:
     venv/Scripts/python.exe .pi/skills/kib-e-domain/scripts/dump_excel_schema.py [path-to-xlsx]
 
-Default path: repo root Format_Excel_KIBE.xlsx (resolved relative to this file).
+Default path: assets/templates/Format_Excel_KIBE.xlsx (resolved relative to this file).
 """
 import sys
 from pathlib import Path
 
 from openpyxl import load_workbook
 
-DEFAULT_PATH = Path(__file__).resolve().parents[4] / "Format_Excel_KIBE.xlsx"
+DEFAULT_PATH = Path(__file__).resolve().parents[4] / "assets" / "templates" / "Format_Excel_KIBE.xlsx"
 WORKSHEET_NAME = "Worksheet"
 
 
